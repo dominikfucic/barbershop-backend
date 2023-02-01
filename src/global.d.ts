@@ -1,4 +1,4 @@
-export {};
+import { Response, Request, NextFunction } from "express";
 
 declare module "express-session" {
   interface SessionData {
@@ -15,4 +15,6 @@ declare global {
       SESSION_SECRET: string;
     }
   }
+  type Controller = (req: Request, res: Response, next: NextFunction) => void;
 }
+export {};

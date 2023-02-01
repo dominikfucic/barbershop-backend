@@ -1,10 +1,13 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express, { NextFunction, Request, Response } from "express";
 import session from "express-session";
 import storeBuilder from "connect-session-sequelize";
 import cors from "cors";
 import morgan from "morgan";
-import  sequelize  from "./database/connection";
+import sequelize from "./database/connection";
 import { usersRouter } from "./routes/users";
+import { appointmentsRouter } from "./routes/appointments";
 
 const app = express();
 const SequelizeStore = storeBuilder(session.Store);
@@ -29,6 +32,7 @@ app.use(
 store.sync();
 
 app.use("/api/users", usersRouter);
+app.use("/api/appointments", appointmentsRouter);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.log(err);
