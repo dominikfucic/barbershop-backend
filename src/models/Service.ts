@@ -13,6 +13,7 @@ class Service extends Model<
   InferCreationAttributes<Service>
 > {
   declare id: CreationOptional<string>;
+  declare name: string;
   declare price: number;
   declare duration: number;
   declare description: string;
@@ -21,12 +22,12 @@ class Service extends Model<
 Service.init(
   {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
       unique: true,
-      allowNull: false,
       primaryKey: true,
     },
+    name: { type: DataTypes.STRING, allowNull: false },
     price: { type: DataTypes.INTEGER, allowNull: false },
     duration: { type: DataTypes.INTEGER, allowNull: false },
     description: { type: DataTypes.STRING, allowNull: false },
@@ -34,6 +35,6 @@ Service.init(
   { sequelize }
 );
 
-Service.sync();
+// Service.sync();
 
 export default Service;
