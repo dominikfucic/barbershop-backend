@@ -8,6 +8,8 @@ import morgan from "morgan";
 import sequelize from "./database/connection";
 import { usersRouter } from "./routes/users";
 import { appointmentsRouter } from "./routes/appointments";
+import { servicesRouter } from "./routes/services";
+import { barbersRouter } from "./routes/barbers";
 
 const app = express();
 const SequelizeStore = storeBuilder(session.Store);
@@ -32,6 +34,8 @@ app.use(
 store.sync();
 
 app.use("/api/users", usersRouter);
+app.use("/api/services", servicesRouter);
+app.use("/api/barbers", barbersRouter);
 app.use("/api/appointments", appointmentsRouter);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
