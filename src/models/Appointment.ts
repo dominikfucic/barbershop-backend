@@ -25,22 +25,21 @@ class Appointment extends Model<
 Appointment.init(
   {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
       unique: true,
-      allowNull: false,
       primaryKey: true,
     },
     barberId: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     userId: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     serviceId: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     startDateTime: {
@@ -55,10 +54,10 @@ Appointment.init(
   { sequelize }
 );
 
-Appointment.hasOne(Service);
-Appointment.hasOne(Barber);
-Appointment.hasOne(User);
+Service.hasOne(Appointment);
+Barber.hasOne(Appointment);
+User.hasOne(Appointment);
 
-Appointment.sync();
+// Appointment.sync();
 
 export default Appointment;
