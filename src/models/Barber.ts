@@ -19,18 +19,17 @@ class Barber extends Model<
 Barber.init(
   {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
       unique: true,
-      allowNull: false,
       primaryKey: true,
     },
   },
   { sequelize }
 );
 
-User.hasOne(Barber);
+Barber.belongsTo(User)
 
-Barber.sync();
+// Barber.sync();
 
 export default Barber;

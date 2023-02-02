@@ -20,10 +20,10 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 User.init(
   {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
       unique: true,
+      primaryKey: true,
     },
     firstName: { type: DataTypes.STRING, allowNull: false },
     lastName: { type: DataTypes.STRING, allowNull: false },
@@ -35,6 +35,6 @@ User.init(
   { sequelize }
 );
 
-User.sync();
+// User.sync();
 
 export default User;
