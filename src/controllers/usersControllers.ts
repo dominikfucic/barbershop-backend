@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { UniqueConstraintError } from "sequelize";
 import crypto from "node:crypto";
 import User from "../models/User";
+import { MongoServerError } from "mongodb";
 
 export const signup = async (
   req: Request,
@@ -34,11 +34,12 @@ export const signup = async (
       const { id, email, firstName, lastName } = user;
       res.status(201).json({ id, email, firstName, lastName });
     });
-  } catch (err) {
-    if (err instanceof UniqueConstraintError) {
-      return res.status(409).json({ message: "Email already exists!" });
+  } catch (error) {
+    if (error instanceof MongoServerError && error.code === 11000) {
+      res.status(409).json({ message: "Email already exists!" });
+    } else {
+      next(error);
     }
-    next(err);
   }
 };
 
@@ -48,13 +49,9 @@ export const login = async (
   next: NextFunction
 ) => {
   try {
-    const row = await User.findOne({
-      where: { email: req.body.email },
-    })
+    const user = await User.findOne({ email: req.body.email });
 
-    if (!row) return res.status(404).json({ message: "User not found" });
-
-    const user = row as User
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const hashedPassword = crypto.pbkdf2Sync(
       req.body.password,
@@ -66,7 +63,8 @@ export const login = async (
 
     if (crypto.timingSafeEqual(user.password, hashedPassword)) {
       req.session.regenerate((err) => {
-        if (err) throw new Error("Failed to regenerate the session");
+        if (err) throw err;
+        // if (err) throw new Error("Failed to regenerate the session");
         req.session.user = user;
         const { id, email, firstName, lastName } = user;
         res.status(200).json({ id, email, firstName, lastName });
@@ -74,8 +72,8 @@ export const login = async (
     } else {
       return res.status(401).json({ message: "Wrong password" });
     }
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 

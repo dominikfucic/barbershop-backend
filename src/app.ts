@@ -2,21 +2,18 @@ import dotenv from "dotenv";
 dotenv.config();
 import express, { NextFunction, Request, Response } from "express";
 import session from "express-session";
-import storeBuilder from "connect-session-sequelize";
 import cors from "cors";
 import morgan from "morgan";
-import sequelize from "./database/connection";
 import { usersRouter } from "./routes/users";
 import { appointmentsRouter } from "./routes/appointments";
 import { servicesRouter } from "./routes/services";
 import { barbersRouter } from "./routes/barbers";
+import MongoStore from "connect-mongo";
 
 const app = express();
-const SequelizeStore = storeBuilder(session.Store);
-const store = new SequelizeStore({ db: sequelize });
 
 app.use(morgan("common"));
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ origin: "http://localhost:5173" }));
 
 if (process.env.NODE_ENV === "development") app.use(cors());
 
@@ -26,12 +23,10 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: store,
+    store: new MongoStore({ mongoUrl: "mongodb://127.0.0.1:27017/barbershop" }),
     cookie: { secure: process.env.NODE_ENV === "production" },
   })
 );
-
-store.sync();
 
 app.use("/api/users", usersRouter);
 app.use("/api/services", servicesRouter);

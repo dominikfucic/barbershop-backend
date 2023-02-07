@@ -1,35 +1,15 @@
-import {
-  CreationOptional,
-  DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
-  Model,
-} from "sequelize";
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-import sequelize from "../database/connection";
-import User from "./User";
-
-class Barber extends Model<
-  InferAttributes<Barber>,
-  InferCreationAttributes<Barber>
-> {
-  declare id: CreationOptional<string>;
-}
-
-Barber.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      unique: true,
-      primaryKey: true,
-    },
+const barberSchema = new Schema({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
   },
-  { sequelize }
-);
+  firstName: String,
+  lastName: String,
+});
 
-Barber.belongsTo(User)
-
-// Barber.sync();
+const Barber = mongoose.model("Barber", barberSchema);
 
 export default Barber;

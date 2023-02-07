@@ -1,63 +1,14 @@
-import sequelize from "../database/connection";
-import {
-  Model,
-  InferAttributes,
-  InferCreationAttributes,
-  DataTypes,
-  CreationOptional,
-} from "sequelize";
-import Service from "./Service";
-import Barber from "./Barber";
-import User from "./User";
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-class Appointment extends Model<
-  InferAttributes<Appointment>,
-  InferCreationAttributes<Appointment>
-> {
-  declare id: CreationOptional<string>;
-  declare barberId: string;
-  declare userId: string;
-  declare serviceId: string;
-  declare startDateTime: Date;
-  declare endDateTime: Date;
-}
+const appointmentSchema = new Schema({
+  barberId: { type: Number, unique: true, required: true },
+  userId: { type: Number, unique: true, required: true  },
+  serviceId: { type: Number , unique: true, required: true },
+  startDateTime: { type: Date, unique: true, required: true  },
+  endDateTime: { type: Date , unique: true, required: true },
+});
 
-Appointment.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      unique: true,
-      primaryKey: true,
-    },
-    barberId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    serviceId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    startDateTime: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    endDateTime: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-  },
-  { sequelize }
-);
-
-Service.hasOne(Appointment);
-Barber.hasOne(Appointment);
-User.hasOne(Appointment);
-
-// Appointment.sync();
+const Appointment = mongoose.model("Appointment", appointmentSchema);
 
 export default Appointment;

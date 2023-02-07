@@ -1,12 +1,11 @@
+import mongoose from "mongoose";
 import app from "./app";
-import sequelize from "./database/connection";
 
 const PORT = process.env.PORT || 8000;
 
-sequelize
-  .authenticate()
-  .then(() => console.log("connected sucessfully"))
-  .catch((err) => console.error(err));
+(async () => {
+  await mongoose.connect("mongodb://127.0.0.1:27017/barbershop");
+})();
 
 app.listen(PORT, async () => {
   console.log(`App listening on port: ${PORT}`);

@@ -1,61 +1,80 @@
-import { QueryTypes } from "sequelize";
-import sequelize from "../database/connection";
+import { Document, ObjectId } from "mongoose";
+import Appointment from "../models/Appointment";
 import Barber from "../models/Barber";
 import User from "../models/User";
 
 export const getBarbers: Controller = async (req, res, next) => {
   try {
-    let barbers: any[] = await Barber.findAll({ include: [User] });
+    const barbers = (await Barber.find().populate(
+      "userId",
+      "firstName lastName"
+    )) as Barber[];
 
-    barbers = barbers.map((barber) => {
+    const _barbers = barbers.map((barber) => {
       return {
-        id: barber.id,
-        firstName: barber.User.firstName,
-        lastName: barber.User.lastName,
-      };
+        _id: barber._id,
+        firstName: barber.userId.firstName,
+        lastName: barber.userId.lastName,
+      } as BarberResponse;
     });
 
-    if (barbers.length === 0) {
+    if (_barbers.length === 0) {
       return res.status(404).json({ message: "Barbers not found." });
     }
-    res.status(200).json({ barbers: barbers });
+
+    res.status(200).json({ barbers: _barbers });
   } catch (err) {
     next(err);
   }
 };
 
 export const getFreeSlots: Controller = async (req, res, next) => {
-  try {
-    const freeSlots = await sequelize.query(
-      `WITH RECURSIVE freeSlots AS (
-        SELECT CAST(:start AS DATETIME) AS startDateTime, CAST(:start AS DATETIME) + INTERVAL :duration MINUTE AS endDateTime
-          UNION ALL
-        SELECT startDateTime + INTERVAL :duration MINUTE, endDateTime + INTERVAL :duration MINUTE FROM freeSlots WHERE EXTRACT(HOUR FROM endDateTime) < 16
-    )
-    
-    SELECT fs.startDateTime, fs.endDateTime FROM freeSlots AS fs
-      WHERE NOT EXISTS (
-        SELECT * FROM appointments as a
-            WHERE TIME(fs.startDateTime) < a.endDateTime 
-          AND TIME(fs.endDateTime) > a.startDateTime
-          AND barberId = :barberId
-            )
-      AND EXTRACT(HOUR FROM fs.startDateTime) >= 8
-        AND EXTRACT(HOUR FROM fs.endDateTime) <= 16
-    ORDER BY fs.startDateTime;`,
-      {
-        replacements: {
-          barberId: req.params.id,
-          start: req.query.start,
-          duration: req.query.duration,
-        },
-        type: QueryTypes.SELECT,
-      }
-    );
+  function generateTimeSlots(startTime: Date, endTime: Date, interval: number) {
+    let currentTime = new Date(startTime);
+    const end = new Date(endTime);
+    const timeSlots = [];
 
-    console.log(freeSlots);
-    res.status(200).json(freeSlots);
-  } catch (err) {
-    next(err);
+    while (currentTime <= end) {
+      timeSlots.push({
+        startDateTime: new Date(currentTime),
+        endDateTime: new Date(
+          currentTime.setMinutes(currentTime.getMinutes() + interval)
+        ),
+      });
+    }
+
+    return timeSlots;
+  }
+
+  try {
+    const bookedTimeSlots = await Appointment.find({
+      barberId: req.params.barberId,
+    }).select("startDateTime endDateTime");
+    const startTime = new Date(req.query.startTime as string);
+    const endTime = new Date(
+      startTime.getFullYear(),
+      startTime.getMonth(),
+      startTime.getDate(),
+      16,
+      0,
+      0,
+      0
+    );
+    const interval = Number(req.query.duration);
+    let freeSlots = generateTimeSlots(startTime, endTime, interval);
+    freeSlots = freeSlots.filter(
+      (slot) =>
+        !bookedTimeSlots.some(
+          (timeSlot) =>
+            slot.startDateTime.getTime() === timeSlot.startDateTime.getTime()
+        )
+    );
+    if (freeSlots.length === 0) {
+      res.status(400).json({ message: "Couldn't get free slots." });
+    } else {
+      res.status(200).json(freeSlots);
+    }
+  } catch (error) {
+    next(error);
   }
 };

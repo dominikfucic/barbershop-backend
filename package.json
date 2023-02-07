@@ -4,20 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "npx nodemon --exec ts-node --files src/server.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "connect-session-sequelize": "^7.1.5",
+    "connect-mongo": "^4.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
-    "morgan": "^1.10.0",
-    "mysql2": "^3.0.1",
-    "sequelize": "^6.28.0"
+    "mongodb": "^4.1.0",
+    "mongoose": "^6.9.0",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
@@ -26,10 +27,8 @@
     "@types/jest": "^29.4.0",
     "@types/morgan": "^1.9.4",
     "@types/node": "^18.11.18",
-    "@types/sequelize": "^4.28.14",
     "jest": "^29.4.0",
     "nodemon": "^2.0.20",
-    "sequelize-cli": "^6.5.2",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1"
   }
